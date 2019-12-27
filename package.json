@@ -9,6 +9,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "libphonenumber-js": "^1.7.29",
     "react": "16.9.0",
     "react-native": "0.61.5",
     "react-native-gesture-handler": "^1.5.2",

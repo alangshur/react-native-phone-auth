@@ -1,25 +1,42 @@
 import React, { Component } from 'react';
 import { StyleSheet, View, TextInput, Text } from 'react-native'
+import { AsYouType, format } from 'libphonenumber-js'
 
 class Auth extends Component {
 	constructor(props) {
 		super(props);
+
+		// set initial text states
 		this.state = { 
 			phone: '',
-			selected: false
+			selected: false,
+			placeholder: 'Enter Phone Number'
 		};
 	}
 
 	handlePhoneChange = phone => {
-		this.setState({ phone });
+		let formatted = new AsYouType('US').input(phone);
+
+		// correct formatted number
+		if (formatted.length == 5) formatted = formatted.substring(1, 4);
+		this.setState({ phone: formatted });
+
+		// submit phone number
+		if (formatted.length == 14) console.log('Submitted!');
 	}
 
 	handlePhoneFocus = () => {
-		this.setState({ selected: true });
+		this.setState({ 
+			selected: true,
+			placeholder: ''
+		});
 	}
 	
 	handlePhoneBlur = () => {
-		this.setState({ selected: false });
+		this.setState({ 
+			selected: false,
+			placeholder: 'Enter Phone Number'
+		});
 	}
 
 	render() {
@@ -30,17 +47,22 @@ class Auth extends Component {
 				{this.state.selected && plusOneText}
 				<TextInput style={styles.phoneText}
 					name='phone'
-					onChangeText={this.handlePhoneChange}
 
+					// input callbacks
+					onChangeText={this.handlePhoneChange}
 					onFocus={this.handlePhoneFocus}
 					onBlur={this.handlePhoneBlur}
-
+					
+					// input values
 					value={this.state.phone}
-					placeholder='Enter Phone Number'
+					placeholder={this.state.placeholder}
 
+					// input config
+					textContentType='telephoneNumber' 
 					keyboardType='number-pad'
-					maxLength={10}
+					maxLength={14}
 
+					// input selection config
 					caretHidden={true}
 					contextMenuHidden={true}
 					selection={{
@@ -62,7 +84,7 @@ const styles = StyleSheet.create({
 		alignItems: 'center'
 	},
 	phoneText: {
-		fontSize: 23,
+		fontSize: 25,
 		marginLeft: 5
 	}
 });
