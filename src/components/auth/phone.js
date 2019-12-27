@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
-import { StyleSheet, View, TextInput, Text } from 'react-native'
-import { AsYouType, format } from 'libphonenumber-js'
+import { StyleSheet, View, TextInput, Text } from 'react-native';
+import { AsYouType } from 'libphonenumber-js';
+import axios from 'axios';
+
+import { API_URL } from 'react-native-dotenv'
 
 class PhoneAuth extends Component {
 	constructor(props) {
@@ -22,7 +25,22 @@ class PhoneAuth extends Component {
 		this.setState({ phone: formatted });
 
 		// submit phone number
-		if (formatted.length == 14) console.log('Submitted!');
+		if (formatted.length == 14) {
+			let phone = '1' + formatted.substring(1, 4) 
+				+ formatted.substring(6, 9) 
+				+ formatted.substring(10, 14)
+			
+			// submit phone number
+			axios.get(API_URL + '/user/phone', {
+				params: { num: phone }
+			})
+			.then(res => {
+				console.log(res.data);
+			})
+			.catch(error => {
+				console.log(error);
+			});
+		}
 	}
 
 	handlePhoneFocus = () => {
