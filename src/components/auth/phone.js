@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { StyleSheet, View, TextInput, Text } from 'react-native'
 import { AsYouType, format } from 'libphonenumber-js'
 
-class Auth extends Component {
+class PhoneAuth extends Component {
 	constructor(props) {
 		super(props);
 
@@ -89,4 +89,4 @@ const styles = StyleSheet.create({
 	}
 });
 
-export default Auth;
+export default PhoneAuth;

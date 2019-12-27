@@ -1,14 +1,16 @@
 import { createStackNavigator } from 'react-navigation-stack';
 
-import Auth from '../auth';
+import PhoneAuth from '../auth/phone';
+import ValidateAuth from '../auth/validate';
 
 // build auth stack navigator
 const AuthNavigation = createStackNavigator(
     {
-        Auth: { screen: Auth }
+        PhoneAuth: { screen: PhoneAuth },
+        ValidateAuth: { screen: ValidateAuth }
     },
     {
-        initialRouteName: 'Auth',
+        initialRouteName: 'PhoneAuth',
         headerMode: 'none'
     }
 );
