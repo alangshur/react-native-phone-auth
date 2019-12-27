@@ -5,7 +5,7 @@ class Home extends Component {
 	render() {
 		return (
 			<View style={styles.container}>
-				<Text style={styles.instructions}>Hello world!</Text>
+				<Text style={styles.instructions}>Home</Text>
 			</View>
 		);
 	}
