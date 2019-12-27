@@ -1,58 +1,53 @@
 import React, { Component } from 'react';
-import { StyleSheet, View, Button, TextInput } from 'react-native'
+import { StyleSheet, View, TextInput, Text } from 'react-native'
 
 class Auth extends Component {
 	constructor(props) {
 		super(props);
 		this.state = { 
-			email: '',
-			password: ''
+			phone: '',
+			selected: false
 		};
 	}
 
-	handleEmailChange = email => {
-		this.setState({ email });
+	handlePhoneChange = phone => {
+		this.setState({ phone });
+	}
+
+	handlePhoneFocus = () => {
+		this.setState({ selected: true });
 	}
 	
-	handlePasswordChange = password => {
-		this.setState({ password });
+	handlePhoneBlur = () => {
+		this.setState({ selected: false });
 	}
 
-	onLogin = async () => {
-		const { email, password } = this.state;
+	render() {
+		let plusOneText = <Text style={styles.phoneText}>+1</Text>
 
-		try {
-			if (email.length > 0 && password.length > 0) {
-				this.props.navigation.navigate('App');
-			}
-		} 
-		catch (error) {
-			alert(error);
-		}
-	}
-
-	render() {	
 		return (
 			<View style={styles.container}>
-				<View style={{ margin: 10 }}>
-					<TextInput
-						name='email'
-						value={this.state.email}
-						placeholder='Enter email'
-						autoCapitalize='none'
-						onChangeText={this.handleEmailChange}
-					/>
-				</View>
-				<View style={{ margin: 10 }}>
-					<TextInput
-						name='password'
-						value={this.state.password}
-						placeholder='Enter password'
-						secureTextEntry
-						onChangeText={this.handlePasswordChange}
-					/>
-				</View>
-				<Button title='Login' onPress={this.onLogin} />
+				{this.state.selected && plusOneText}
+				<TextInput style={styles.phoneText}
+					name='phone'
+					onChangeText={this.handlePhoneChange}
+
+					onFocus={this.handlePhoneFocus}
+					onBlur={this.handlePhoneBlur}
+
+					value={this.state.phone}
+					placeholder='Enter Phone Number'
+
+					keyboardType='number-pad'
+					maxLength={10}
+
+					caretHidden={true}
+					contextMenuHidden={true}
+					selection={{
+						start: this.state.phone.length, 
+						end: this.state.phone.length
+					}}
+				/>
 			</View>
 		);
 	}
@@ -61,9 +56,14 @@ class Auth extends Component {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
+		flexDirection: 'row',
 		backgroundColor: '#fff',
-		alignItems: 'center',
-		justifyContent: 'center'
+		justifyContent: 'center',
+		alignItems: 'center'
+	},
+	phoneText: {
+		fontSize: 23,
+		marginLeft: 5
 	}
 });
 
