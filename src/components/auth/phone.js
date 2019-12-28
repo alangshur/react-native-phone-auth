@@ -16,6 +16,7 @@ class PhoneAuth extends Component {
 			phone: '',
 			showCountryCode: false,
 			placeholder: 'Enter Phone Number',
+			editable: true
 		};
 	}
 
@@ -42,9 +43,13 @@ class PhoneAuth extends Component {
 
 		// submit phone number
 		if (formatted.length == 14) {
-			let final = '1' + raw;
-			
-			// // submit phone number
+
+			// make uneditable 
+			this.setState({ editable: false });
+			this.phoneInput.blur();
+
+			// // call phone API
+			// let final = '1' + raw;
 			// axios.get(API_URL + '/user/phone', {
 			// 	params: { num: final }
 			// })
@@ -61,11 +66,12 @@ class PhoneAuth extends Component {
 	}
 	
 	handlePhoneBlur = () => {
-		this.setState({ 
-			phone: '',
-			showCountryCode: false,
-			placeholder: 'Enter Phone Number'
-		});
+		if (this.state.phone.length < 14)
+			this.setState({ 
+				phone: '',
+				showCountryCode: false,
+				placeholder: 'Enter Phone Number'
+			});
 	}
 
 	render() {
@@ -79,8 +85,8 @@ class PhoneAuth extends Component {
 					{this.state.showCountryCode && <Text style={styles.phoneText}>+1</Text>}
 					<TextInput 
 						name='phone'
+						style={this.state.editable ? styles.phoneText : styles.phoneTextSubmit}
 						ref={(input) => { this.phoneInput = input; }}
-						style={styles.phoneText}
 
 						// input callbacks
 						onChangeText={this.handlePhoneChange}
@@ -123,6 +129,11 @@ const styles = StyleSheet.create({
 	phoneText: {
 		fontSize: 25,
 		marginLeft: 5
+	},
+	phoneTextSubmit: {
+		fontSize: 25,
+		marginLeft: 5,
+		color: 'lightgray'
 	}
 });
 

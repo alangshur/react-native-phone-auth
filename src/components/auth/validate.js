@@ -13,7 +13,8 @@ class ValidateAuth extends Component {
 		// set initial text states
 		this.state = { 
 			code: '',
-			placeholder: 'Enter Six-Digit Code'
+            placeholder: 'Enter Six-Digit Code',
+            editable: true
 		};
 	}
 
@@ -29,6 +30,12 @@ class ValidateAuth extends Component {
 
         // submit code number
 		if (code.length == 6) {
+
+            // make uneditable
+            this.setState({ editable: false });
+            this.codeInput.blur();
+
+            // call validate API
 			axios.get(API_URL + '/user/validate', {
 				params: { num: code }
 			})
@@ -43,10 +50,11 @@ class ValidateAuth extends Component {
 	}
 
 	handleCodeBlur = () => {
-		this.setState({ 
-			code: '',
-			placeholder: 'Enter Six-Digit Code'
-		});
+        if (this.state.code.length < 6) 
+            this.setState({ 
+                code: '',
+                placeholder: 'Enter Six-Digit Code'
+            });
 	}
 
 	render() {
@@ -59,8 +67,8 @@ class ValidateAuth extends Component {
 				<View style={styles.container}>
 					<TextInput 
 						name='validate'
-						ref={(input) => { this.phoneInput = input; }}
-						style={styles.codeText}
+                        style={this.state.editable ? styles.codeText : styles.codeTextSubmit}
+                        ref={(input) => { this.codeInput = input; }}
 
 						// input callbacks
 						onChangeText={this.handleCodeChange}
@@ -68,7 +76,7 @@ class ValidateAuth extends Component {
 						
 						// input values
 						value={this.state.code}
-						placeholder={this.state.placeholder}
+                        placeholder={this.state.placeholder}
 
 						// input config
 						keyboardType='number-pad'
@@ -102,6 +110,11 @@ const styles = StyleSheet.create({
 	codeText: {
 		fontSize: 25,
 		marginLeft: 5
+    },
+	codeTextSubmit: {
+		fontSize: 25,
+		marginLeft: 5,
+		color: 'lightgray'
 	}
 });
 
