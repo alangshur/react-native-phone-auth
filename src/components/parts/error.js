@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import { Text, StyleSheet, Animated } from 'react-native';
 
 export class ErrorBanner extends PureComponent {
     constructor(props) {
@@ -59,8 +59,8 @@ const styles = StyleSheet.create({
     },
     errorText: {
         color: 'white',
-        fontSize: 16,
-        top: 25,
+        fontSize: 17,
+        top: 30,
         textAlign: 'center',
         fontWeight: 'bold'
     }

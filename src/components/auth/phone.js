@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { StyleSheet, View, TextInput, Text } from 'react-native';
-import { AsYouType } from 'libphonenumber-js';
 import axios from 'axios';
 
+import { getRawPhoneNumber, formatRawPhoneNumber } from './util'
 import { ErrorBanner } from '../parts/error'
 
 import { API_URL } from 'react-native-dotenv'
@@ -14,47 +14,58 @@ class PhoneAuth extends Component {
 		// set initial text states
 		this.state = { 
 			phone: '',
-			selected: false,
-			placeholder: 'Enter Phone Number'
+			showCountryCode: false,
+			placeholder: 'Enter Phone Number',
 		};
 	}
 
 	handlePhoneChange = phone => {
-		let formatted = new AsYouType('US').input(phone);
 
-		// correct formatted number
-		if (formatted.length == 5) formatted = formatted.substring(1, 4);
+		// remove placeholder
+		if (phone.length == 0) {
+			this.setState({ 
+				showCountryCode: false,
+				placeholder: 'Enter Phone Number'
+			});
+		}
+		else if (phone.length == 1) {
+			this.setState({ 
+				showCountryCode: true,
+				placeholder: ''
+			});
+		}
+
+		// re-format phone number and set state
+		let raw = getRawPhoneNumber(phone);
+		let formatted = formatRawPhoneNumber(raw);
 		this.setState({ phone: formatted });
 
 		// submit phone number
 		if (formatted.length == 14) {
-			let phone = '1' + formatted.substring(1, 4) 
-				+ formatted.substring(6, 9) 
-				+ formatted.substring(10, 14)
+			let final = '1' + raw;
 			
-			// submit phone number
-			axios.get(API_URL + '/user/phone', {
-				params: { num: phone }
-			})
-			.then(res => {
-				if (!res.data.success) throw new Error();
-			})
-			.catch(error => {
-				console.log(error);
-				this.errorBanner.toggle();
-			});
+			// // submit phone number
+			// axios.get(API_URL + '/user/phone', {
+			// 	params: { num: final }
+			// })
+			// .then(res => {
+			// 	if (!res.data.success) throw new Error();
+			// 	this.props.navigation.navigate('ValidateAuth');
+			// })
+			// .catch(error => {
+			// 	console.log(error);
+			// 	this.errorBanner.toggle();
+			// });
+			this.props.navigation.navigate('ValidateAuth');
 		}
-	}
-
-	handlePhoneFocus = () => {
-		this.setState({ 
-			selected: true,
-			placeholder: ''
-		});
 	}
 	
 	handlePhoneBlur = () => {
-		this.phoneInput.focus();
+		this.setState({ 
+			phone: '',
+			showCountryCode: false,
+			placeholder: 'Enter Phone Number'
+		});
 	}
 
 	render() {
@@ -65,7 +76,7 @@ class PhoneAuth extends Component {
 					ref={(input) => { this.errorBanner = input; }}
 				/>
 				<View style={styles.container}>
-					{this.state.selected && <Text style={styles.phoneText}>+1</Text>}
+					{this.state.showCountryCode && <Text style={styles.phoneText}>+1</Text>}
 					<TextInput 
 						name='phone'
 						ref={(input) => { this.phoneInput = input; }}
@@ -73,7 +84,6 @@ class PhoneAuth extends Component {
 
 						// input callbacks
 						onChangeText={this.handlePhoneChange}
-						onFocus={this.handlePhoneFocus}
 						onBlur={this.handlePhoneBlur}
 						
 						// input values
