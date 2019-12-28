@@ -40,7 +40,9 @@ class ValidateAuth extends Component {
 				params: { num: code }
 			})
 			.then(res => {
-				if (!res.data.success) throw new Error();
+                if (!res.data.success) throw new Error();
+                
+                // save authentication code and go home
 			})
 			.catch(error => {
 				console.log(error);

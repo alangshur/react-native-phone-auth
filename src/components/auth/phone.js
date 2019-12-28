@@ -48,19 +48,21 @@ class PhoneAuth extends Component {
 			this.setState({ editable: false });
 			this.phoneInput.blur();
 
-			// // call phone API
-			// let final = '1' + raw;
-			// axios.get(API_URL + '/user/phone', {
-			// 	params: { num: final }
-			// })
-			// .then(res => {
-			// 	if (!res.data.success) throw new Error();
-			// 	this.props.navigation.navigate('ValidateAuth');
-			// })
-			// .catch(error => {
-			// 	console.log(error);
-			// 	this.errorBanner.toggle();
-			// });
+			// call phone API
+			let final = '1' + raw;
+			axios.get(API_URL + '/user/phone', {
+				params: { num: final }
+			})
+			.then(res => {
+				if (!res.data.success) throw new Error();
+
+				// navigate to validation page
+				this.props.navigation.navigate('ValidateAuth');
+			})
+			.catch(error => {
+				console.log(error);
+				this.errorBanner.toggle();
+			});
 			this.props.navigation.navigate('ValidateAuth');
 		}
 	}
