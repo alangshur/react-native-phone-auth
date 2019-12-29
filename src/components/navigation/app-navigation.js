@@ -1,16 +1,22 @@
-import { createStackNavigator } from 'react-navigation-stack';
+import { createSwitchNavigator, createAppContainer } from 'react-navigation';
 
-import HomeApp from '../app/home';
+import LandingNavigation from './landing-navigation'
+import AuthNavigation from './auth-navigation';
+import MainNavigation from './main-navigation';
 
-// build app stack navigator
-const AppNavigation = createStackNavigator(
+// build landing-auth-app switch navigator
+const SwitchNavigator = createSwitchNavigator(
     {
-        HomeApp: { screen: HomeApp }
+        Landing: LandingNavigation,
+        Auth: AuthNavigation,
+        Main: MainNavigation
     },
     {
-        initialRouteName: 'HomeApp',
-        headerMode: 'none'
+        initialRouteName: 'Landing'
     }
 );
+
+// containerize switch navigator
+const AppNavigation = createAppContainer(SwitchNavigator);
 
 export default AppNavigation;

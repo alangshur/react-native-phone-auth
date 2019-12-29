@@ -63,29 +63,31 @@ class ValidateAuth extends Component {
 				this.submitCodeState(() => {
 					
 					// build base token
-					const internalSalt = this._reactInternalFiber.alternate.type.name;
+					const internalSalt = this.constructor.name;
 					const baseToken = md5(internalSalt + API_SALT + validationCode)
 
 					// call validate API
-					axios.get(API_URL + '/user/validate', {
+					axios.get(API_URL + '/auth/validate', {
 						params: { 
 							base_token: baseToken,
 							validation_code: validationCode 
 						}
 					})
 					.then(res => {
-						if (res.data.violation) {
+						if (!res.data.success) {
+							if (res.data.critical) {
 							
-							// change state to unsubmitted
-							this.unsubmitCodeState(() => {
-
-								// navigate to Landing
-								console.log('Navigating to LandingNavigation.Landing')
-								this.props.navigation.navigate('Landing', { critical: true });
-							});
-							return;
+								// change state to unsubmitted
+								this.unsubmitCodeState(() => {
+	
+									// navigate to Landing
+									console.log('Navigating to LandingNavigation.Landing')
+									this.props.navigation.navigate('StartLanding', { critical: true });
+								});
+								return;
+							}
+							else throw new Error('Exception in server request');
 						}
-						else if (!res.data.success) throw new Error();
 						
 						// save access token 
 						accessToken = res.data.access_token;
@@ -94,9 +96,9 @@ class ValidateAuth extends Component {
 						// change state to unsubmitted
 						this.unsubmitCodeState(() => {
 
-							// navigate to AppNavigation
-							console.log('Navigating to AppNavigation.HomeApp');
-							this.props.navigation.navigate('HomeApp');
+							// navigate to MainNavigation
+							console.log('Navigating to MainNavigation.HomeMain');
+							this.props.navigation.navigate('HomeMain');
 						});
 					})
 					.catch(error => {
@@ -117,7 +119,7 @@ class ValidateAuth extends Component {
 								return;
 							}
 							else this.setState({ errorCount: errorCount }, () => {
-								
+
 								// toggle error banner
 								this.errorBanner.toggle();
 							});

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import AppNavigation from './components/navigation';
+import AppNavigation from './components/navigation/app-navigation';
 
 class App extends Component {
 	render = () => {

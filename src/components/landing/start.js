@@ -3,7 +3,7 @@ import { StyleSheet, View, Text } from 'react-native';
 
 import * as Keychain from 'react-native-keychain';
 
-class Landing extends PureComponent {
+class StartLanding extends PureComponent {
     constructor(props) {
         super(props);
         this.state = { landingText: '' };
@@ -15,9 +15,9 @@ class Landing extends PureComponent {
         const credentials = await Keychain.getInternetCredentials('access_token');
         if (credentials) {
 
-            // navigate to AppNavigation
-            console.log('Navigating to AppNavigation.HomeApp');
-            this.props.navigation.navigate('HomeApp');
+            // navigate to MainNavigation
+            console.log('Navigating to MainNavigation.HomeMain');
+            this.props.navigation.navigate('HomeMain');
         }
         else {
 
@@ -42,14 +42,12 @@ class Landing extends PureComponent {
 
             // check for navigation params
             const refresh = this.props.navigation
-                .dangerouslyGetParent()
                 .getParam('refresh');
             const critical = this.props.navigation
-                .dangerouslyGetParent()
                 .getParam('critical');
 
             // act on navigation params
-            if (Boolean(critical)) throw Exception('Critical application error');
+            if (Boolean(critical)) throw Error('Critical exception');
             else if (Boolean(refresh)) this.refreshAuthentication();
             else this.checkAuthentication();
         }
@@ -87,4 +85,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default Landing;
+export default StartLanding;

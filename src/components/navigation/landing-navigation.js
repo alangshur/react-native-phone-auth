@@ -1,14 +1,14 @@
 import { createStackNavigator } from 'react-navigation-stack';
 
-import Landing from '../landing';
+import StartLanding from '../landing/start';
 
 // build landing stack navigator
 const LandingNavigation = createStackNavigator(
     {
-        Landing: { screen: Landing }
+        StartLanding: { screen: StartLanding }
     },
     {
-        initialRouteName: 'Landing',
+        initialRouteName: 'StartLanding',
         headerMode: 'none'
     }
 );
