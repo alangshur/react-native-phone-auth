@@ -80,7 +80,18 @@ class PhoneAuth extends Component {
 						}
 					})
 					.then(res => {
-						if (!res.data.success) throw new Error();
+						if (res.data.violation) {
+							
+							// change state to unsubmitted
+							this.unsubmitPhoneState(() => {
+
+								// navigate to Landing
+								console.log('Navigating to LandingNavigation.Landing')
+								this.props.navigation.navigate('Landing', { critical: true });
+							});
+							return;
+						}
+						else if (!res.data.success) throw new Error();
 
 						// change state to unsubmitted
 						this.unsubmitPhoneState(() => {

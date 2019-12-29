@@ -74,7 +74,18 @@ class ValidateAuth extends Component {
 						}
 					})
 					.then(res => {
-						if (!res.data.success) throw new Error();
+						if (res.data.violation) {
+							
+							// change state to unsubmitted
+							this.unsubmitCodeState(() => {
+
+								// navigate to Landing
+								console.log('Navigating to LandingNavigation.Landing')
+								this.props.navigation.navigate('Landing', { critical: true });
+							});
+							return;
+						}
+						else if (!res.data.success) throw new Error();
 						
 						// save access token 
 						accessToken = res.data.access_token;
@@ -105,10 +116,11 @@ class ValidateAuth extends Component {
 								});
 								return;
 							}
-							else this.setState({ errorCount: errorCount });
-							
-							// toggle error banner
-							this.errorBanner.toggle();
+							else this.setState({ errorCount: errorCount }, () => {
+								
+								// toggle error banner
+								this.errorBanner.toggle();
+							});
 						});
 					});
 				});

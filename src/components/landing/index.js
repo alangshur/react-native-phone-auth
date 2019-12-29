@@ -6,49 +6,66 @@ import * as Keychain from 'react-native-keychain';
 class Landing extends PureComponent {
     constructor(props) {
         super(props);
-        this.state = {
-            landingText1: '',
-            landingText2: ''
-        };
+        this.state = { landingText: '' };
     }
 
     async checkAuthentication() {
+
+        // fetch secure access token
+        const credentials = await Keychain.getInternetCredentials('access_token');
+        if (credentials) {
+
+            // navigate to AppNavigation
+            console.log('Navigating to AppNavigation.HomeApp');
+            this.props.navigation.navigate('HomeApp');
+        }
+        else {
+
+            // navigate to AuthNavigation
+            console.log('Navigating to AuthNavigation.PhoneAuth');
+            this.props.navigation.navigate('PhoneAuth');
+        }
+    }
+
+    async refreshAuthentication() {
+
+        // reset secure access token
+        await Keychain.resetInternetCredentials('access_token');
+
+        // navigate to AuthNavigation
+        console.log('Navigating to AuthNavigation.PhoneAuth');
+        this.props.navigation.navigate('PhoneAuth');
+    }
+
+    componentDidMount = () => {
         try {
-            const credentials = await Keychain.getInternetCredentials('access_token');
-            if (credentials) {
 
-                // navigate to AppNavigation
-                console.log('Navigating to AppNavigation.HomeApp');
-                this.props.navigation.navigate('HomeApp');
-            }
-            else {
+            // check for navigation params
+            const refresh = this.props.navigation
+                .dangerouslyGetParent()
+                .getParam('refresh');
+            const critical = this.props.navigation
+                .dangerouslyGetParent()
+                .getParam('critical');
 
-                // navigate to AuthNavigation
-                console.log('Navigating to AuthNavigation.PhoneAuth');
-                this.props.navigation.navigate('PhoneAuth');
-            }
+            // act on navigation params
+            if (Boolean(critical)) throw Exception('Critical application error');
+            else if (Boolean(refresh)) this.refreshAuthentication();
+            else this.checkAuthentication();
         }
         catch (error) {
             console.log(error);
 
             // set landing page error message
-            this.setState({ 
-                landingText1: 'Error launching app.',
-                landingText2: 'Please wait and try again.' 
-            });
+            this.setState({ landingText: 'Error! Please restart or reinstall app.' });
         }
-    }
-
-    componentDidMount = () => {
-        this.checkAuthentication();
     }
 
     render = () => {
         return (
             <View style={styles.page}>
                 <View style={styles.container}>
-                    <Text style={styles.landingText}>{this.state.landingText1}</Text>
-                    <Text style={styles.landingText}>{this.state.landingText2}</Text>
+                    <Text style={styles.landingText}>{this.state.landingText}</Text>
                 </View>
             </View>
         );
