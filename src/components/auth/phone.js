@@ -11,81 +11,92 @@ class PhoneAuth extends Component {
 	constructor(props) {
 		super(props);
 
-		// set initial text states
+		// set initial phone state
 		this.state = { 
 			phone: '',
 			showCountryCode: false,
 			placeholder: 'Enter Phone Number',
-			editable: true
+			submitted: false
 		};
+	}
+
+	submitPhoneState = (callback) => {
+		this.phoneInput.blur();
+		this.setState({ submitted: true }, callback);
+	}
+
+	unsubmitPhoneState = (callback) => {
+		this.phoneInput.blur();
+		this.setState({ 
+			phone: '',
+			showCountryCode: false,
+			placeholder: 'Enter Phone Number',
+			submitted: false
+		}, callback);
 	}
 
 	handlePhoneChange = phone => {
 
-		// remove placeholder
+		// remove placeholder for edge cases
 		if (phone.length == 0) {
 			this.setState({ 
+				phone: phone,
 				showCountryCode: false,
 				placeholder: 'Enter Phone Number'
 			});
+			return;
 		}
 		else if (phone.length == 1) {
 			this.setState({ 
+				phone: phone,
 				showCountryCode: true,
 				placeholder: ''
 			});
+			return;
 		}
 
-		// re-format phone number and set state
+		// re-format phone number and set new state
 		let raw = getRawPhoneNumber(phone);
 		let formatted = formatRawPhoneNumber(raw);
-		this.setState({ phone: formatted });
+		this.setState({ phone: formatted }, () => {
 
-		// submit phone number
-		if (formatted.length == 14) {
+			// submit phone number
+			if (formatted.length == 14) {
 
-			// make uneditable 
-			this.setState({ editable: false });
-			this.phoneInput.blur();
+				// change state to submitted
+				this.submitPhoneState(() => {
 
-			// call phone API
-			let final = '1' + raw;
-			axios.get(API_URL + '/user/phone', {
-				params: { num: final }
-			})
-			.then(res => {
-				if (!res.data.success) throw new Error();
+					// call phone API
+					axios.get(API_URL + '/user/phone', {
+						params: { num: '1' + raw }
+					})
+					.then(res => {
+						if (!res.data.success) throw new Error();
 
-				// navigate to validation page
-				console.log('Navigating to AuthNavigation.ValidateAuth')
-				this.props.navigation.navigate('ValidateAuth');
-			})
-			.catch(error => {
-				console.log(error);
-				this.errorBanner.toggle();
+						// change state to unsubmitted
+						this.unsubmitPhoneState(() => {
 
-				// reset phone input
-				this.phoneInput.blur();
-				this.setState({ 
-					phone: '',
-					showCountryCode: false,
-					placeholder: 'Enter Phone Number',
-					editable: true
+							// navigate to ValidateAuth
+							console.log('Navigating to AuthNavigation.ValidateAuth')
+							this.props.navigation.navigate('ValidateAuth');
+						});
+					})
+					.catch(error => {
+						console.log(error);
+
+						// change state to unsubmitted
+						this.unsubmitPhoneState(() => {
+
+							// toggle error banner
+							this.errorBanner.toggle();
+						});
+					});
 				});
-			});
-		}
-	}
-	
-	handlePhoneBlur = () => {
-		if (this.state.phone.length < 14)
-			this.setState({ 
-				phone: '',
-				showCountryCode: false,
-				placeholder: 'Enter Phone Number'
-			});
+			}
+		});
 	}
 
-	render() {
+	render = () => {
 		return (
 			<View style={styles.page}>
 				<ErrorBanner 
@@ -94,17 +105,16 @@ class PhoneAuth extends Component {
 				/>
 				<View style={styles.container}>
 
-					{this.state.showCountryCode && <Text style={this.state.editable ? 
-						styles.plusOneText : styles.plusOneTextSubmit}>+1</Text>}
+					{this.state.showCountryCode && <Text style={this.state.submitted ? 
+						styles.plusOneTextSubmitted : styles.plusOneText}>+1</Text>}
 
 					<TextInput 
 						name='phone'
-						style={this.state.editable ? styles.phoneText : styles.phoneTextSubmit}
+						style={this.state.submitted ? styles.phoneTextSubmitted : styles.phoneText}
 						ref={(input) => { this.phoneInput = input; }}
 
 						// input callbacks
 						onChangeText={this.handlePhoneChange}
-						onBlur={this.handlePhoneBlur}
 						
 						// input values
 						value={this.state.phone}
@@ -144,7 +154,7 @@ const styles = StyleSheet.create({
 		fontSize: 25,
 		marginRight: 5
 	},
-	plusOneTextSubmit: {
+	plusOneTextSubmitted: {
 		fontSize: 25,
 		marginRight: 5,
 		color: 'lightgray'
@@ -152,7 +162,7 @@ const styles = StyleSheet.create({
 	phoneText: {
 		fontSize: 25,
 	},
-	phoneTextSubmit: {
+	phoneTextSubmitted: {
 		fontSize: 25,
 		color: 'lightgray'
 	}

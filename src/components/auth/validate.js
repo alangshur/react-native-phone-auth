@@ -11,70 +11,104 @@ class ValidateAuth extends Component {
 	constructor(props) {
 		super(props);
 
-		// set initial text states
+		// set initial validate state
 		this.state = { 
 			code: '',
             placeholder: 'Enter Six-Digit Code',
-            editable: true
+            submitted: false,
+            errorCount: 0
 		};
+	}
+
+	submitCodeState = (callback) => {
+		this.codeInput.blur();
+		this.setState({ submitted: true }, callback);
+	}
+
+	unsubmitCodeState = (callback) => {
+		this.codeInput.blur();
+		this.setState({ 
+			code: '',
+			placeholder: 'Enter Six-Digit Code',
+			submitted: false
+		}, callback);
 	}
 
 	handleCodeChange = code => {
 
-        // remove placeholder
-		if (code.length == 0)
-			this.setState({ placeholder: 'Enter Six-Digit Code' });
-        else if (code.length == 1) this.setState({ placeholder: '' });
-
-        // set state 
-        this.setState({ code: code });
-
-        // submit code number
-		if (code.length == 6) {
-
-            // make uneditable
-            this.setState({ editable: false });
-            this.codeInput.blur();
-
-            // call validate API
-			axios.get(API_URL + '/user/validate', {
-				params: { num: code }
-			})
-			.then(res => {
-                if (!res.data.success) throw new Error();
-                
-                // save access token 
-                accessToken = res.data.access_token;
-                Keychain.setInternetCredentials('access_token', accessToken, '');
-
-				// navigate to AppNavigation
-                console.log('Navigating to AppNavigation.HomeApp');
-                this.props.navigation.navigate('HomeApp');
-			})
-			.catch(error => {
-				console.log(error);
-                this.errorBanner.toggle();
-                
-                // reset validation input
-                this.codeInput.blur();
-                this.setState({ 
-                    code: '',
-                    placeholder: 'Enter Six-Digit Code',
-                    editable: true
-                });
+        // remove placeholder for edge cases
+		if (code.length == 0) {
+			this.setState({ 
+				code: code,
+				placeholder: 'Enter Six-Digit Code'
 			});
+			return;
 		}
+        else if (code.length == 1) {
+			this.setState({ 
+				code: code,
+				placeholder: 'Enter Six-Digit Code'
+			});
+			return;
+		}
+
+        // set new state 
+        this.setState({ code: code }, () => {
+
+			// submit code number
+			if (code.length == 6) {
+
+				// change state to submitted
+				this.submitCodeState(() => {
+
+					// call validate API
+					axios.get(API_URL + '/user/validate', {
+						params: { num: code }
+					})
+					.then(res => {
+						if (!res.data.success) throw new Error();
+						
+						// save access token 
+						accessToken = res.data.access_token;
+						Keychain.setInternetCredentials('access_token', accessToken, '');
+
+						// change state to unsubmitted
+						this.unsubmitCodeState(() => {
+
+							// navigate to AppNavigation
+							console.log('Navigating to AppNavigation.HomeApp');
+							this.props.navigation.navigate('HomeApp');
+						});
+					})
+					.catch(error => {
+						console.log(error);
+
+						// change state to unsubmitted
+						this.unsubmitCodeState(() => {
+
+							// count errors
+							const errorCount = this.state.errorCount + 1;
+							if (errorCount >= 3) {
+								this.setState({ errorCount: 0 }, () => {
+
+									// navigate to PhoneAuth
+									console.log('Navigating to AuthNavigation.PhoneAuth');
+									this.props.navigation.navigate('PhoneAuth');
+								});
+								return;
+							}
+							else this.setState({ errorCount: errorCount });
+							
+							// toggle error banner
+							this.errorBanner.toggle();
+						});
+					});
+				});
+			}
+		});
 	}
 
-	handleCodeBlur = () => {
-        if (this.state.code.length < 6) 
-            this.setState({ 
-                code: '',
-                placeholder: 'Enter Six-Digit Code'
-            });
-	}
-
-	render() {
+	render = () => {
 		return (
 			<View style={styles.page}>
 				<ErrorBanner 
@@ -84,12 +118,11 @@ class ValidateAuth extends Component {
 				<View style={styles.container}>
 					<TextInput 
 						name='validate'
-                        style={this.state.editable ? styles.codeText : styles.codeTextSubmit}
+                        style={this.state.submitted ?  styles.codeTextSubmitted : styles.codeText}
                         ref={(input) => { this.codeInput = input; }}
 
 						// input callbacks
 						onChangeText={this.handleCodeChange}
-						onBlur={this.handleCodeBlur}
 						
 						// input values
 						value={this.state.code}
@@ -127,7 +160,7 @@ const styles = StyleSheet.create({
 	codeText: {
 		fontSize: 25
     },
-	codeTextSubmit: {
+	codeTextSubmitted: {
 		fontSize: 25,
 		color: 'lightgray'
 	}

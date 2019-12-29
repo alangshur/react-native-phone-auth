@@ -30,6 +30,8 @@ class Landing extends PureComponent {
         }
         catch (error) {
             console.log(error);
+
+            // set landing page error message
             this.setState({ 
                 landingText1: 'Error launching app.',
                 landingText2: 'Please wait and try again.' 
@@ -37,11 +39,11 @@ class Landing extends PureComponent {
         }
     }
 
-    componentDidMount() {
+    componentDidMount = () => {
         this.checkAuthentication();
     }
 
-    render() {
+    render = () => {
         return (
             <View style={styles.page}>
                 <View style={styles.container}>

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 class HomeApp extends Component {
-	render() {
+	render = () => {
 		return (
 			<View style={styles.page}>
 				<View style={styles.container}>

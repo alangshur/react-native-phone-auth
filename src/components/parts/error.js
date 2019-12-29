@@ -10,7 +10,7 @@ export class ErrorBanner extends PureComponent {
         };
     }
 
-    toggleAnimation(toValue) {
+    toggleAnimation = toValue => {
         Animated.timing(
             this.state.bounceValue,
             {
@@ -21,17 +21,17 @@ export class ErrorBanner extends PureComponent {
         ).start();
     }
 
-    toggle() {
+    toggle = () => {
         if (!this.state.hidden) return;
         this.setState({ hidden: false });
-        this.toggleAnimation(120);
+        this.toggleAnimation(100);
         setTimeout(() => { 
             this.toggleAnimation(0); 
             this.setState({ hidden: true });
         }, 6000);
     }
 
-    render() {
+    render = () => {
         return (
             <Animated.View 
                 style={[
@@ -51,8 +51,8 @@ const styles = StyleSheet.create({
     errorBanner: {
         position: 'absolute',
         zIndex: 1,
-        top: -120,
-        height: 120,
+        top: -100,
+        height: 100,
         width: '100%',
         justifyContent: 'center',
         alignItems: 'center',
@@ -60,8 +60,8 @@ const styles = StyleSheet.create({
     },
     errorText: {
         color: 'white',
-        fontSize: 17,
-        top: 25,
+        fontSize: 16,
+        top: 23,
         marginLeft: 30,
         marginRight: 30,
         textAlign: 'center',
