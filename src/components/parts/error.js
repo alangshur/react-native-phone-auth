@@ -33,12 +33,13 @@ export class ErrorBanner extends PureComponent {
 
     render() {
         return (
-            <Animated.View style={[
-                styles.errorBanner, 
-                {transform: [{ 
-                    translateY: this.state.bounceValue 
-                }]}
-            ]}
+            <Animated.View 
+                style={[
+                    styles.errorBanner, 
+                    {transform: [{ 
+                        translateY: this.state.bounceValue 
+                    }]}
+                ]}
             >
                 <Text style={styles.errorText}>{this.props.text}</Text>
             </Animated.View>
@@ -60,7 +61,9 @@ const styles = StyleSheet.create({
     errorText: {
         color: 'white',
         fontSize: 17,
-        top: 30,
+        top: 25,
+        marginLeft: 30,
+        marginRight: 30,
         textAlign: 'center',
         fontWeight: 'bold'
     }

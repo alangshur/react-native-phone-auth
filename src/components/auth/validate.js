@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { StyleSheet, View, TextInput, Text } from 'react-native';
+import { StyleSheet, View, TextInput } from 'react-native';
+import * as Keychain from 'react-native-keychain';
 import axios from 'axios';
 
 import { ErrorBanner } from '../parts/error'
@@ -42,11 +43,25 @@ class ValidateAuth extends Component {
 			.then(res => {
                 if (!res.data.success) throw new Error();
                 
-                // save authentication code and go home
+                // save access token 
+                accessToken = res.data.access_token;
+                Keychain.setInternetCredentials('access_token', accessToken, '');
+
+				// navigate to AppNavigation
+                console.log('Navigating to AppNavigation.HomeApp');
+                this.props.navigation.navigate('HomeApp');
 			})
 			.catch(error => {
 				console.log(error);
-				this.errorBanner.toggle();
+                this.errorBanner.toggle();
+                
+                // reset validation input
+                this.codeInput.blur();
+                this.setState({ 
+                    code: '',
+                    placeholder: 'Enter Six-Digit Code',
+                    editable: true
+                });
 			});
 		}
 	}
@@ -63,7 +78,7 @@ class ValidateAuth extends Component {
 		return (
 			<View style={styles.page}>
 				<ErrorBanner 
-					text='Error: Failed to validate with code.'
+					text='Error! Please wait and try again.'
 					ref={(input) => { this.errorBanner = input; }}
 				/>
 				<View style={styles.container}>
@@ -110,12 +125,10 @@ const styles = StyleSheet.create({
 		alignItems: 'center'
 	},
 	codeText: {
-		fontSize: 25,
-		marginLeft: 5
+		fontSize: 25
     },
 	codeTextSubmit: {
 		fontSize: 25,
-		marginLeft: 5,
 		color: 'lightgray'
 	}
 });

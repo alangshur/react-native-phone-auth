@@ -57,13 +57,22 @@ class PhoneAuth extends Component {
 				if (!res.data.success) throw new Error();
 
 				// navigate to validation page
+				console.log('Navigating to AuthNavigation.ValidateAuth')
 				this.props.navigation.navigate('ValidateAuth');
 			})
 			.catch(error => {
 				console.log(error);
 				this.errorBanner.toggle();
+
+				// reset phone input
+				this.phoneInput.blur();
+				this.setState({ 
+					phone: '',
+					showCountryCode: false,
+					placeholder: 'Enter Phone Number',
+					editable: true
+				});
 			});
-			this.props.navigation.navigate('ValidateAuth');
 		}
 	}
 	
@@ -80,11 +89,14 @@ class PhoneAuth extends Component {
 		return (
 			<View style={styles.page}>
 				<ErrorBanner 
-					text='Error: Failed to submit phone number.'
+					text='Error! Please wait and try again.'
 					ref={(input) => { this.errorBanner = input; }}
 				/>
 				<View style={styles.container}>
-					{this.state.showCountryCode && <Text style={styles.phoneText}>+1</Text>}
+
+					{this.state.showCountryCode && <Text style={this.state.editable ? 
+						styles.plusOneText : styles.plusOneTextSubmit}>+1</Text>}
+
 					<TextInput 
 						name='phone'
 						style={this.state.editable ? styles.phoneText : styles.phoneTextSubmit}
@@ -128,13 +140,20 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		alignItems: 'center'
 	},
+	plusOneText: {
+		fontSize: 25,
+		marginRight: 5
+	},
+	plusOneTextSubmit: {
+		fontSize: 25,
+		marginRight: 5,
+		color: 'lightgray'
+	},
 	phoneText: {
 		fontSize: 25,
-		marginLeft: 5
 	},
 	phoneTextSubmit: {
 		fontSize: 25,
-		marginLeft: 5,
 		color: 'lightgray'
 	}
 });
