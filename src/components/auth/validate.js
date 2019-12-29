@@ -2,10 +2,11 @@ import React, { Component } from 'react';
 import { StyleSheet, View, TextInput } from 'react-native';
 import * as Keychain from 'react-native-keychain';
 import axios from 'axios';
+import md5 from 'md5'
 
 import { ErrorBanner } from '../parts/error'
 
-import { API_URL } from 'react-native-dotenv'
+import { API_URL, API_SALT } from 'react-native-dotenv'
 
 class ValidateAuth extends Component {
 	constructor(props) {
@@ -13,7 +14,7 @@ class ValidateAuth extends Component {
 
 		// set initial validate state
 		this.state = { 
-			code: '',
+			validationCode: '',
             placeholder: 'Enter Six-Digit Code',
             submitted: false,
             errorCount: 0
@@ -28,42 +29,49 @@ class ValidateAuth extends Component {
 	unsubmitCodeState = (callback) => {
 		this.codeInput.blur();
 		this.setState({ 
-			code: '',
+			validationCode: '',
 			placeholder: 'Enter Six-Digit Code',
 			submitted: false
 		}, callback);
 	}
 
-	handleCodeChange = code => {
+	handleCodeChange = validationCode => {
 
         // remove placeholder for edge cases
-		if (code.length == 0) {
+		if (validationCode.length == 0) {
 			this.setState({ 
-				code: code,
+				validationCode: validationCode,
 				placeholder: 'Enter Six-Digit Code'
 			});
 			return;
 		}
-        else if (code.length == 1) {
+        else if (validationCode.length == 1) {
 			this.setState({ 
-				code: code,
+				validationCode: validationCode,
 				placeholder: 'Enter Six-Digit Code'
 			});
 			return;
 		}
 
         // set new state 
-        this.setState({ code: code }, () => {
+        this.setState({ validationCode: validationCode }, () => {
 
-			// submit code number
-			if (code.length == 6) {
+			// submit validation code
+			if (validationCode.length == 6) {
 
 				// change state to submitted
 				this.submitCodeState(() => {
+					
+					// build base token
+					const internalSalt = this._reactInternalFiber.alternate.type.name;
+					const baseToken = md5(internalSalt + API_SALT + validationCode)
 
 					// call validate API
 					axios.get(API_URL + '/user/validate', {
-						params: { num: code }
+						params: { 
+							base_token: baseToken,
+							validation_code: validationCode 
+						}
 					})
 					.then(res => {
 						if (!res.data.success) throw new Error();
@@ -117,7 +125,7 @@ class ValidateAuth extends Component {
 				/>
 				<View style={styles.container}>
 					<TextInput 
-						name='validate'
+						name='validation-code'
                         style={this.state.submitted ?  styles.codeTextSubmitted : styles.codeText}
                         ref={(input) => { this.codeInput = input; }}
 
@@ -125,7 +133,7 @@ class ValidateAuth extends Component {
 						onChangeText={this.handleCodeChange}
 						
 						// input values
-						value={this.state.code}
+						value={this.state.validationCode}
                         placeholder={this.state.placeholder}
 
 						// input config
@@ -136,8 +144,8 @@ class ValidateAuth extends Component {
 						caretHidden={true}
 						contextMenuHidden={true}
 						selection={{
-							start: this.state.code.length, 
-							end: this.state.code.length
+							start: this.state.validationCode.length, 
+							end: this.state.validationCode.length
 						}}
 					/>
 				</View>

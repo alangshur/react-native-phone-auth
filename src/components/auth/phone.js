@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import { StyleSheet, View, TextInput, Text } from 'react-native';
 import axios from 'axios';
+import md5 from 'md5'
 
 import { getRawPhoneNumber, formatRawPhoneNumber } from './util'
 import { ErrorBanner } from '../parts/error'
 
-import { API_URL } from 'react-native-dotenv'
+import { API_URL, API_SALT } from 'react-native-dotenv'
 
 class PhoneAuth extends Component {
 	constructor(props) {
@@ -13,7 +14,7 @@ class PhoneAuth extends Component {
 
 		// set initial phone state
 		this.state = { 
-			phone: '',
+			phoneNumber: '',
 			showCountryCode: false,
 			placeholder: 'Enter Phone Number',
 			submitted: false
@@ -28,27 +29,27 @@ class PhoneAuth extends Component {
 	unsubmitPhoneState = (callback) => {
 		this.phoneInput.blur();
 		this.setState({ 
-			phone: '',
+			phoneNumber: '',
 			showCountryCode: false,
 			placeholder: 'Enter Phone Number',
 			submitted: false
 		}, callback);
 	}
 
-	handlePhoneChange = phone => {
+	handlePhoneChange = phoneNumber => {
 
 		// remove placeholder for edge cases
-		if (phone.length == 0) {
+		if (phoneNumber.length == 0) {
 			this.setState({ 
-				phone: phone,
+				phoneNumber: phoneNumber,
 				showCountryCode: false,
 				placeholder: 'Enter Phone Number'
 			});
 			return;
 		}
-		else if (phone.length == 1) {
+		else if (phoneNumber.length == 1) {
 			this.setState({ 
-				phone: phone,
+				phoneNumber: phoneNumber,
 				showCountryCode: true,
 				placeholder: ''
 			});
@@ -56,19 +57,27 @@ class PhoneAuth extends Component {
 		}
 
 		// re-format phone number and set new state
-		let raw = getRawPhoneNumber(phone);
+		let raw = getRawPhoneNumber(phoneNumber);
 		let formatted = formatRawPhoneNumber(raw);
-		this.setState({ phone: formatted }, () => {
+		this.setState({ phoneNumber: formatted }, () => {
 
 			// submit phone number
 			if (formatted.length == 14) {
 
 				// change state to submitted
 				this.submitPhoneState(() => {
+					const finalPhone = '1' + raw;
+
+					// build base token
+					const internalSalt = this._reactInternalFiber.alternate.type.name;
+					const baseToken = md5(internalSalt + API_SALT + finalPhone)
 
 					// call phone API
 					axios.get(API_URL + '/user/phone', {
-						params: { num: '1' + raw }
+						params: { 
+							base_token: baseToken,
+							phone_number: finalPhone
+						}
 					})
 					.then(res => {
 						if (!res.data.success) throw new Error();
@@ -109,7 +118,7 @@ class PhoneAuth extends Component {
 						styles.plusOneTextSubmitted : styles.plusOneText}>+1</Text>}
 
 					<TextInput 
-						name='phone'
+						name='phone-number'
 						style={this.state.submitted ? styles.phoneTextSubmitted : styles.phoneText}
 						ref={(input) => { this.phoneInput = input; }}
 
@@ -117,7 +126,7 @@ class PhoneAuth extends Component {
 						onChangeText={this.handlePhoneChange}
 						
 						// input values
-						value={this.state.phone}
+						value={this.state.phoneNumber}
 						placeholder={this.state.placeholder}
 
 						// input config
@@ -129,8 +138,8 @@ class PhoneAuth extends Component {
 						caretHidden={true}
 						contextMenuHidden={true}
 						selection={{
-							start: this.state.phone.length, 
-							end: this.state.phone.length
+							start: this.state.phoneNumber.length, 
+							end: this.state.phoneNumber.length
 						}}
 					/>
 				</View>
