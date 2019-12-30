@@ -1,3 +1,8 @@
+import axios from 'axios';
+import md5 from 'md5'
+
+import { API_URL, API_SALT } from 'react-native-dotenv'
+
 export function getRawPhoneNumber(formattedPhoneNumber) {
     let rawPhoneNumber = '';
 
@@ -39,4 +44,18 @@ export function formatRawPhoneNumber(rawPhoneNumber) {
     else formattedPhoneNumber = rawPhoneNumber;
 
     return formattedPhoneNumber;
+}
+
+export async function sendUnauthenticatedRequest(internalSalt, target, path, params) {
+
+    // build base token
+    const baseToken = md5(internalSalt + API_SALT + target)
+
+    // call home API
+    return axios.get(API_URL + path, {
+        params: params,
+        headers: {
+            base_token: baseToken,
+        }
+    });
 }

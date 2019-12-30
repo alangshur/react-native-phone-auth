@@ -1,12 +1,9 @@
 import React, { Component } from 'react';
 import { StyleSheet, View, TextInput, Text } from 'react-native';
-import axios from 'axios';
-import md5 from 'md5'
 
-import { getRawPhoneNumber, formatRawPhoneNumber } from './util'
+import { getRawPhoneNumber, formatRawPhoneNumber, 
+	sendUnauthenticatedRequest } from './util'
 import { ErrorBanner } from '../parts/error'
-
-import { API_URL, API_SALT } from 'react-native-dotenv'
 
 class PhoneAuth extends Component {
 	constructor(props) {
@@ -68,18 +65,10 @@ class PhoneAuth extends Component {
 				this.submitPhoneState(() => {
 					const finalPhone = '1' + raw;
 
-					// build base token
-					const internalSalt = this.constructor.name
-					const baseToken = md5(internalSalt + API_SALT + finalPhone)
-
 					// call phone API
-					axios.get(API_URL + '/auth/phone', {
-						params: { 
-							phone_number: finalPhone
-						},
-						headers: {
-							base_token: baseToken
-						}
+					sendUnauthenticatedRequest(this.constructor.name, 
+						finalPhone, '/auth/phone', {
+						phone_number: finalPhone 
 					})
 					.then(res => {
 						if (!res.data.success) {
@@ -90,7 +79,9 @@ class PhoneAuth extends Component {
 	
 									// navigate to Landing
 									console.log('Navigating to LandingNavigation.Landing')
-									this.props.navigation.navigate('StartLanding', { critical: true });
+									this.props.navigation.navigate('StartLanding', { 
+										critical: true 
+									});
 								});
 								return;
 							}

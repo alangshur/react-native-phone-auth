@@ -1,12 +1,9 @@
 import React, { Component } from 'react';
 import { StyleSheet, View, TextInput } from 'react-native';
 import * as Keychain from 'react-native-keychain';
-import axios from 'axios';
-import md5 from 'md5'
 
+import { sendUnauthenticatedRequest } from './util'
 import { ErrorBanner } from '../parts/error'
-
-import { API_URL, API_SALT } from 'react-native-dotenv'
 
 class ValidateAuth extends Component {
 	constructor(props) {
@@ -61,19 +58,11 @@ class ValidateAuth extends Component {
 
 				// change state to submitted
 				this.submitCodeState(() => {
-					
-					// build base token
-					const internalSalt = this.constructor.name;
-					const baseToken = md5(internalSalt + API_SALT + validationCode)
 
 					// call validate API
-					axios.get(API_URL + '/auth/validate', {
-						params: { 
-							validation_code: validationCode 
-						},
-						headers: {
-							base_token: baseToken
-						}
+					sendUnauthenticatedRequest(this.constructor.name, 
+						validationCode, '/auth/validate', {
+						validation_code: validationCode 
 					})
 					.then(res => {
 						if (!res.data.success) {
@@ -84,7 +73,9 @@ class ValidateAuth extends Component {
 	
 									// navigate to Landing
 									console.log('Navigating to LandingNavigation.Landing')
-									this.props.navigation.navigate('StartLanding', { critical: true });
+									this.props.navigation.navigate('StartLanding', { 
+										critical: true 
+									});
 								});
 								return;
 							}

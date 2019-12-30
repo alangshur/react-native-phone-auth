@@ -1,68 +1,53 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import * as Keychain from 'react-native-keychain';
-import axios from 'axios';
-import md5 from 'md5'
+import MapboxGL from 'react-native-mapbox-gl'
 
-import { API_URL, API_SALT } from 'react-native-dotenv'
+import { sendAuthenticatedRequest } from './util'
+
+import { MAPBOX_API_KEY } from 'react-native-dotenv'
+
+MapboxGL.setAccessToken(MAPBOX_API_KEY);
 
 class HomeMain extends Component {
 	constructor(props) {
 		super(props);
-		this.state = {
-			homeText: ''
-		};
+		this.state = {};
 	}	
 	
 	componentDidMount = () => {
 
-		// build base token
-		const artificialTarget = Math.floor(Math.random() * 10e6)
-		const internalSalt = this.constructor.name;
-		const baseToken = md5(internalSalt + API_SALT + artificialTarget)
-
-		// call home API
-		Keychain.getInternetCredentials('access_token')
-		.then(credentials => {
-			axios.get(API_URL + '/main/home', {
-				params: { 
-					artificial_target: artificialTarget
-				},
-				headers: {
-					base_token: baseToken,
-					access_token: credentials.username
-				}
-			})
-			.then(res => {
-				this.setState({ homeText: res.data.payload });
-			})
-			.catch(error => {
-				console.log(error);
-			});
-		});
+		// warmup home API
+		const artificialTarget = Math.floor(Math.random() * 10e6);
+		sendAuthenticatedRequest(this.constructor.name, artificialTarget, 
+			'/main/home', { artificial_target: artificialTarget })
+		.then(res => { console.log(res.data) })
+		.catch(error => { console.log(error) });
 	}
 
 	render = () => {
 		return (
-			<View style={styles.page}>
-				<View style={styles.container}>
-					<Text>{this.state.homeText}</Text>
-				</View>
+			<View style={{flex: 1}}>
+				<MapboxGL.MapView
+					ref={(c) => this._map = c}
+					style={{flex: 1}}
+					zoomLevel={15}
+					centerCoordinate={[-73.98197650909422, 40.768793007758816]}>
+				</MapboxGL.MapView>
 			</View>
 		);
 	}
 }
 
-const styles = StyleSheet.create({
-	page: {
-		flex: 1,
-	},
-	container: {
-		flex: 1,
-		justifyContent: 'center',
-		alignItems: 'center',
-		backgroundColor: '#fff'
-	}
-});
+// const styles = StyleSheet.create({
+// 	page: {
+// 		flex: 1,
+// 	},
+// 	container: {
+// 		flex: 1,
+// 		justifyContent: 'center',
+// 		alignItems: 'center',
+// 		backgroundColor: '#fff'
+// 	}
+// });
 
 export default HomeMain;

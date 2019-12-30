@@ -47,7 +47,10 @@ class StartLanding extends PureComponent {
                 .getParam('critical');
 
             // act on navigation params
-            if (Boolean(critical)) throw Error('Critical exception');
+            if (Boolean(critical)) {
+                this.refreshAuthentication();
+                throw Error('Critical exception');
+            }
             else if (Boolean(refresh)) this.refreshAuthentication();
             else this.checkAuthentication();
         }
