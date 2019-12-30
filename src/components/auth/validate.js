@@ -69,8 +69,10 @@ class ValidateAuth extends Component {
 					// call validate API
 					axios.get(API_URL + '/auth/validate', {
 						params: { 
-							base_token: baseToken,
 							validation_code: validationCode 
+						},
+						headers: {
+							base_token: baseToken
 						}
 					})
 					.then(res => {

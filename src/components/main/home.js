@@ -26,8 +26,10 @@ class HomeMain extends Component {
 		.then(credentials => {
 			axios.get(API_URL + '/main/home', {
 				params: { 
+					artificial_target: artificialTarget
+				},
+				headers: {
 					base_token: baseToken,
-					artificial_target: artificialTarget,
 					access_token: credentials.username
 				}
 			})

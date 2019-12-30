@@ -75,8 +75,10 @@ class PhoneAuth extends Component {
 					// call phone API
 					axios.get(API_URL + '/auth/phone', {
 						params: { 
-							base_token: baseToken,
 							phone_number: finalPhone
+						},
+						headers: {
+							base_token: baseToken
 						}
 					})
 					.then(res => {
