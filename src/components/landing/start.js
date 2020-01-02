@@ -37,20 +37,24 @@ class StartLanding extends PureComponent {
         this.props.navigation.navigate('PhoneAuth');
     }
 
+    async runCriticalException() {
+
+        // reset secure access token
+        await Keychain.resetInternetCredentials('access_token');
+        
+        // raise critical exception
+        throw Error('Critical exception');
+    }
+
     componentDidMount = () => {
         try {
 
             // check for navigation params
-            const refresh = this.props.navigation
-                .getParam('refresh');
-            const critical = this.props.navigation
-                .getParam('critical');
+            const refresh = this.props.navigation.getParam('refresh');
+            const critical = this.props.navigation.getParam('critical');
 
             // act on navigation params
-            if (Boolean(critical)) {
-                this.refreshAuthentication();
-                throw Error('Critical exception');
-            }
+            if (Boolean(critical)) this.runCriticalException();
             else if (Boolean(refresh)) this.refreshAuthentication();
             else this.checkAuthentication();
         }
@@ -58,7 +62,9 @@ class StartLanding extends PureComponent {
             console.log(error);
 
             // set landing page error message
-            this.setState({ landingText: 'Error! Please restart or reinstall app.' });
+            this.setState({ 
+                landingText: 'Error! Please restart or reinstall app.' 
+            });
         }
     }
 
